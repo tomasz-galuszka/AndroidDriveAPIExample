@@ -26,7 +26,7 @@ import gdt.tg.com.googledrivetest.base.StatusCodes;
  */
 public class DriveManager {
 
-    private static final String[] SCOPES = {DriveScopes.DRIVE_FILE};
+    private static final java.util.Set<String> SCOPES = DriveScopes.all();
     private final HttpTransport transport = AndroidHttp.newCompatibleTransport();
     private final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
     private com.google.api.services.drive.Drive mService;
@@ -37,7 +37,7 @@ public class DriveManager {
         this.activity = activity;
 
         // Initialize credentials and service object.
-        credential = GoogleAccountCredential.usingOAuth2(activity.getApplicationContext(), Arrays.asList(SCOPES))
+        credential = GoogleAccountCredential.usingOAuth2(activity.getApplicationContext(), SCOPES)
                 .setBackOff(new ExponentialBackOff())
                 .setSelectedAccountName(getSettings().getAccountName());
 

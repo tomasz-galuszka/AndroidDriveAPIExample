@@ -18,6 +18,7 @@ import gdt.tg.com.googledrivetest.base.ErrorHandler;
 import gdt.tg.com.googledrivetest.base.StatusCodes;
 import gdt.tg.com.googledrivetest.base.SuccessHandler;
 import gdt.tg.com.googledrivetest.tasks.CreateDirectoryTask;
+import gdt.tg.com.googledrivetest.tasks.DeleteDirectoryTask;
 import gdt.tg.com.googledrivetest.tasks.ListFilesTask;
 
 public class MainActivity extends Activity {
@@ -91,8 +92,19 @@ public class MainActivity extends Activity {
         mDeleteDirButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // delete directory previously created
-                mStatusText.setText("Trying to delete directory ...");
+                runOnUiThread(new BaseTask(mStatusText, mResultsText, driveManager) {
+                    @Override
+                    public void doAction() {
+                        mStatusText.setText("Trying to create directory ...");
+                        new DeleteDirectoryTask(errorHandler, driveManager.getmService(), new SuccessHandler<String>() {
+                            @Override
+                            public void handle(String s) {
+                                mStatusText.setText(s);
+                                mResultsText.setText("");
+                            }
+                        }).execute("Nazwa katalogu 123");
+                    }
+                });
             }
         });
         mCreateFileButton = (Button) findViewById(R.id.button_create_file);
