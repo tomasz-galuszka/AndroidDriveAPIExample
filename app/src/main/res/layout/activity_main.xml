@@ -15,34 +15,97 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
+        android:editable="false"
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true" />
 
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_marginTop="50dip"
-        android:layout_height="150dip">
+        android:layout_height="150dip"
+        android:layout_marginTop="50dip">
 
         <EditText
             android:id="@+id/resultText"
-            android:layout_width="wrap_content"
+            android:editable="false"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/statusText"
             android:ems="10"
             android:inputType="textMultiLine" />
     </ScrollView>
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create file"
-        android:id="@+id/create_button"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignTop="@+id/scrollView"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="160dp"
+        android:layout_alignParentStart="true">
 
+        <LinearLayout
+            android:id="@+id/linearButtons1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="0dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="List" />
+
+            <Button
+                android:id="@+id/create_dir_button"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:text="Create dir" />
+
+            <Button
+                android:id="@+id/delete_dir_button"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:text="Delete dir" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearButtons2"
+            android:layout_alignTop="@+id/linearButtons1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_create_file"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create file" />
+
+            <Button
+                android:id="@+id/button_delete_file"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:text="Delete file" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>
