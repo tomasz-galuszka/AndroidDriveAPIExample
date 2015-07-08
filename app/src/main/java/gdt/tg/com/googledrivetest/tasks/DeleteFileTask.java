@@ -2,7 +2,6 @@ package gdt.tg.com.googledrivetest.tasks;
 
 import android.os.AsyncTask;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
@@ -14,42 +13,39 @@ import java.util.List;
 import gdt.tg.com.googledrivetest.base.ErrorHandler;
 import gdt.tg.com.googledrivetest.base.SuccessHandler;
 
-/**
- * Created by tomasz on 07.07.15.
- */
-public class DeleteDirectoryTask extends AsyncTask<String, Void, Void> {
+public class DeleteFileTask extends AsyncTask<Params<File>, Void, File> {
 
     private final com.google.api.services.drive.Drive service;
-    private final ErrorHandler errorHandler;
-    private final SuccessHandler<String> successHandler;
+    private SuccessHandler<File> successHandler;
+    private ErrorHandler errorHandler;
     private Throwable error;
 
-    public DeleteDirectoryTask(ErrorHandler errorHandler, com.google.api.services.drive.Drive service, SuccessHandler<String> successHandler) {
-        this.errorHandler = errorHandler;
+    public DeleteFileTask(com.google.api.services.drive.Drive service) {
         this.service = service;
-        this.successHandler = successHandler;
     }
 
     @Override
-    protected Void doInBackground(String... params) {
-        deleteDirectory(params[0]);
-        return null;
+    protected File doInBackground(Params<File>... params) {
+        Params<File> config = params[0];
+        this.errorHandler = config.getErrorHandler();
+        this.successHandler = config.getSuccessHandler();
+
+        return deleteDirectory(config.getData());
     }
 
     @Override
-    protected void onPostExecute(Void v) {
+    protected void onPostExecute(File dir) {
         if (this.error == null) {
-            successHandler.handle("Directory deleted successfully.");
+            successHandler.handle(dir);
         } else {
             errorHandler.handle(this.error);
         }
     }
 
-    private void deleteDirectory(String name) {
+    private File deleteDirectory(File directory) {
         try {
-            List<File> result = new ArrayList<File>();
-            Drive.Files.List request = service.files().list().setQ("title='" + name + "'");
-
+            List<File> result = new ArrayList<>();
+            Drive.Files.List request = service.files().list().setQ("title='" + directory.getTitle() + "'");
             do {
                 try {
                     FileList files = request.execute();
@@ -63,13 +59,11 @@ public class DeleteDirectoryTask extends AsyncTask<String, Void, Void> {
             } while (request.getPageToken() != null && request.getPageToken().length() > 0);
 
             for (File f : result) {
-                String id = f.getId();
-                DateTime createdDate = f.getCreatedDate();
-                service.files().delete(id).execute();
-
+                service.files().delete(f.getId()).execute();
             }
         } catch (IOException e) {
             error = e;
         }
+        return directory;
     }
 }

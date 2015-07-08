@@ -4,6 +4,7 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -11,6 +12,7 @@ import android.widget.EditText;
 
 import com.google.api.services.drive.model.File;
 
+import java.io.FileOutputStream;
 import java.util.List;
 
 import gdt.tg.com.googledrivetest.base.DriveApiErrorHandler;
@@ -18,8 +20,10 @@ import gdt.tg.com.googledrivetest.base.ErrorHandler;
 import gdt.tg.com.googledrivetest.base.StatusCodes;
 import gdt.tg.com.googledrivetest.base.SuccessHandler;
 import gdt.tg.com.googledrivetest.tasks.CreateDirectoryTask;
-import gdt.tg.com.googledrivetest.tasks.DeleteDirectoryTask;
+import gdt.tg.com.googledrivetest.tasks.CreateFileTask;
+import gdt.tg.com.googledrivetest.tasks.DeleteFileTask;
 import gdt.tg.com.googledrivetest.tasks.ListFilesTask;
+import gdt.tg.com.googledrivetest.tasks.Params;
 
 public class MainActivity extends Activity {
 
@@ -83,7 +87,19 @@ public class MainActivity extends Activity {
                     @Override
                     public void doAction() {
                         mStatusText.setText("Trying to create directory ...");
-                        new CreateDirectoryTask(errorHandler, driveManager.getmService()).execute("Nazwa katalogu 123");
+
+                        File dir = new File();
+                        dir.setTitle("SimpleDirectory");
+                        dir.setMimeType("application/vnd.google-apps.folder");
+
+                        Params<File> fileParams = new Params<File>(dir, errorHandler, new SuccessHandler<File>() {
+                            @Override
+                            public void handle(File directory) {
+                                mStatusText.setText("Directory: " + directory.getTitle() + " created successfully.");
+                            }
+                        });
+
+                        new CreateDirectoryTask(driveManager.getmService()).execute(fileParams);
                     }
                 });
             }
@@ -95,14 +111,19 @@ public class MainActivity extends Activity {
                 runOnUiThread(new BaseTask(mStatusText, mResultsText, driveManager) {
                     @Override
                     public void doAction() {
-                        mStatusText.setText("Trying to create directory ...");
-                        new DeleteDirectoryTask(errorHandler, driveManager.getmService(), new SuccessHandler<String>() {
+                        mStatusText.setText("Trying to delete directory ...");
+
+                        File dir = new File();
+                        dir.setTitle("SimpleDirectory");
+                        dir.setMimeType("application/vnd.google-apps.folder");
+
+                        Params<File> fileParams = new Params<File>(dir, errorHandler, new SuccessHandler<File>() {
                             @Override
-                            public void handle(String s) {
-                                mStatusText.setText(s);
-                                mResultsText.setText("");
+                            public void handle(File directory) {
+                                mStatusText.setText("Directory: " + directory.getTitle() + " deleted successfully.");
                             }
-                        }).execute("Nazwa katalogu 123");
+                        });
+                        new DeleteFileTask(driveManager.getmService()).execute(fileParams);
                     }
                 });
             }
@@ -113,6 +134,42 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 // create simple file
                 mStatusText.setText("Trying to create file ...");
+                runOnUiThread(new BaseTask(mStatusText, mResultsText, driveManager) {
+                    @Override
+                    public void doAction() {
+                        try {
+                            mStatusText.setText("Trying to create file ...");
+
+                            File driveFile = new File();
+                            driveFile.setTitle("simple file.txt");
+                            driveFile.setMimeType("text/plain");
+
+                            final java.io.File tmpFile = new java.io.File(Environment.getExternalStorageDirectory() + java.io.File.separator + "simple file");
+                            tmpFile.createNewFile();
+                            if (tmpFile.exists()) {
+                                FileOutputStream fo = new FileOutputStream(tmpFile);
+                                fo.write("Simple content 123123123".getBytes());
+                                fo.close();
+
+                                CreateFileTask.FileData data = new CreateFileTask.FileData(driveFile, tmpFile);
+                                Params<CreateFileTask.FileData> params = new Params<>(data, errorHandler, new SuccessHandler<CreateFileTask.FileData>() {
+                                    @Override
+                                    public void handle(CreateFileTask.FileData fileData) {
+                                        mStatusText.setText("File: " + fileData.getDriveFile().getTitle() + " created successfully.");
+                                        tmpFile.delete();
+                                    }
+                                });
+
+                                new CreateFileTask(driveManager.getmService()).execute(params);
+
+                            } else {
+                                throw new Exception("File couldn't be created on your phone.");
+                            }
+                        } catch (Exception e) {
+                            errorHandler.handle(e);
+                        }
+                    }
+                });
             }
         });
         mDeleteFileButton = (Button) findViewById(R.id.button_delete_file);
@@ -120,6 +177,19 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 mStatusText.setText("Trying to delete file ...");
+
+                File driveFile = new File();
+                driveFile.setTitle("simple file.txt");
+                driveFile.setMimeType("text/plain");
+
+                Params<File> fileParams = new Params<File>(driveFile, errorHandler, new SuccessHandler<File>() {
+                    @Override
+                    public void handle(File directory) {
+                        mStatusText.setText("File: " + directory.getTitle() + " deleted successfully.");
+                    }
+                });
+                new DeleteFileTask(driveManager.getmService()).execute(fileParams);
+
             }
         });
     }
