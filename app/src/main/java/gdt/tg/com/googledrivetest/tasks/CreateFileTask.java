@@ -53,12 +53,13 @@ public class CreateFileTask extends AsyncTask<Params<CreateFileTask.FileData>, V
     }
 
     @Override
-    protected void onPostExecute(CreateFileTask.FileData file) {
+    protected void onPostExecute(CreateFileTask.FileData data) {
         if (this.error == null) {
-            successHandler.handle(file);
+            successHandler.handle(data);
         } else {
             errorHandler.handle(this.error);
         }
+        data.getFile().delete();
     }
 
     private CreateFileTask.FileData createFile(CreateFileTask.FileData data) {

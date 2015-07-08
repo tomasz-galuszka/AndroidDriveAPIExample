@@ -24,6 +24,7 @@ import gdt.tg.com.googledrivetest.tasks.CreateFileTask;
 import gdt.tg.com.googledrivetest.tasks.DeleteFileTask;
 import gdt.tg.com.googledrivetest.tasks.ListFilesTask;
 import gdt.tg.com.googledrivetest.tasks.Params;
+import gdt.tg.com.googledrivetest.tasks.UpdateFileTask;
 
 public class MainActivity extends Activity {
 
@@ -33,6 +34,7 @@ public class MainActivity extends Activity {
     private Button mDeleteDirButton;
     private Button mCreateFileButton;
     private Button mDeleteFileButton;
+    private Button mUpdateFileButton;
     private Button mListButton;
     private DriveManager driveManager;
     private ErrorHandler errorHandler;
@@ -156,10 +158,8 @@ public class MainActivity extends Activity {
                                     @Override
                                     public void handle(CreateFileTask.FileData fileData) {
                                         mStatusText.setText("File: " + fileData.getDriveFile().getTitle() + " created successfully.");
-                                        tmpFile.delete();
                                     }
                                 });
-
                                 new CreateFileTask(driveManager.getmService()).execute(params);
 
                             } else {
@@ -170,6 +170,41 @@ public class MainActivity extends Activity {
                         }
                     }
                 });
+            }
+        });
+        mUpdateFileButton = (Button) findViewById(R.id.button_update_file);
+        mUpdateFileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    mStatusText.setText("Trying to update file ...");
+
+                    File driveFile = new File();
+                    driveFile.setTitle("simple file.txt");
+                    driveFile.setMimeType("text/plain");
+
+                    final java.io.File tmpFile = new java.io.File(Environment.getExternalStorageDirectory() + java.io.File.separator + "simple file");
+                    tmpFile.createNewFile();
+                    if (tmpFile.exists()) {
+                        FileOutputStream fo = new FileOutputStream(tmpFile);
+                        fo.write("File po wykonaniu update :)".getBytes());
+                        fo.close();
+
+                        UpdateFileTask.FileData data = new UpdateFileTask.FileData(driveFile, tmpFile);
+                        Params<UpdateFileTask.FileData> params = new Params<>(data, errorHandler, new SuccessHandler<UpdateFileTask.FileData>() {
+                            @Override
+                            public void handle(UpdateFileTask.FileData fileData) {
+                                mStatusText.setText("File: " + fileData.getDriveFile().getTitle() + " updated successfully.");
+                            }
+                        });
+                        new UpdateFileTask(driveManager.getmService()).execute(params);
+
+                    } else {
+                        throw new Exception("File couldn't be created on your phone.");
+                    }
+                } catch (Exception e) {
+                    errorHandler.handle(e);
+                }
             }
         });
         mDeleteFileButton = (Button) findViewById(R.id.button_delete_file);
