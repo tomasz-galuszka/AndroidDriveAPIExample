@@ -25,6 +25,10 @@ import gdt.tg.com.googledrivetest.tasks.DeleteFileTask;
 import gdt.tg.com.googledrivetest.tasks.ListFilesTask;
 import gdt.tg.com.googledrivetest.tasks.Params;
 import gdt.tg.com.googledrivetest.tasks.UpdateFileTask;
+import jxl.Workbook;
+import jxl.write.Label;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
 
 public class MainActivity extends Activity {
 
@@ -143,21 +147,31 @@ public class MainActivity extends Activity {
                             mStatusText.setText("Trying to create file ...");
 
                             File driveFile = new File();
-                            driveFile.setTitle("simple file.txt");
-                            driveFile.setMimeType("text/plain");
+                            driveFile.setTitle("android-test.xls");
+                            driveFile.setMimeType("application/vnd.ms-excel");
 
-                            final java.io.File tmpFile = new java.io.File(Environment.getExternalStorageDirectory() + java.io.File.separator + "simple file");
-                            tmpFile.createNewFile();
+                            final java.io.File tmpFile = new java.io.File(Environment.getExternalStorageDirectory() + java.io.File.separator + "android-test.xls");
+
+
+                            WritableWorkbook workbook = Workbook.createWorkbook(tmpFile);
+                            WritableSheet sheet = workbook.createSheet("Wydatki", 0);
+
+                            Label label = new Label(0, 2, "Wartosc");
+                            sheet.addCell(label);
+
+                            jxl.write.Number number = new jxl.write.Number(3, 4, 3.567);
+                            sheet.addCell(number);
+                            workbook.write();
+                            workbook.close();
+
+
                             if (tmpFile.exists()) {
-                                FileOutputStream fo = new FileOutputStream(tmpFile);
-                                fo.write("Simple content 123123123".getBytes());
-                                fo.close();
-
                                 CreateFileTask.FileData data = new CreateFileTask.FileData(driveFile, tmpFile);
                                 Params<CreateFileTask.FileData> params = new Params<>(data, errorHandler, new SuccessHandler<CreateFileTask.FileData>() {
                                     @Override
                                     public void handle(CreateFileTask.FileData fileData) {
                                         mStatusText.setText("File: " + fileData.getDriveFile().getTitle() + " created successfully.");
+                                        tmpFile.delete();
                                     }
                                 });
                                 new CreateFileTask(driveManager.getmService()).execute(params);
